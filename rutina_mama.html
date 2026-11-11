@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#163C38">
+<title>Mi Rutina de 5 Días</title>
+<style>
+  :root{
+    --bg:#F5F3ED; --panel:#FFFFFF;
+    --teal-900:#163C38; --teal-700:#1E5952; --teal-500:#2F7A70;
+    --sage:#BFD3C4; --sage-light:#E7EEE6;
+    --ochre:#C6862F; --ochre-light:#F3E3C6;
+    --ink:#232A26; --muted:#6C766E; --line:#DEDACC;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;
+    padding-bottom:110px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px;}
+
+  /* HERO */
+  header.hero{
+    background:linear-gradient(180deg,var(--teal-900),var(--teal-700));
+    color:#F4F1E6;padding:28px 0 22px;
+  }
+  .hero .kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);font-weight:600;}
+  .hero h1{font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:32px;line-height:1.15;margin:6px 0 8px;}
+  .hero p{margin:0;color:#D9E4DC;font-size:16px;}
+
+  /* WEEK OVERVIEW */
+  .week{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:18px 0 0;}
+  .week button{
+    all:unset;cursor:pointer;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+    border-radius:12px;padding:10px 6px;text-align:center;color:#F4F1E6;transition:background .15s;
+  }
+  .week button:hover{background:rgba(255,255,255,.16);}
+  .week .num{display:block;font-size:12px;color:var(--sage);font-weight:600;}
+  .week .lbl{display:block;font-size:14px;font-weight:600;line-height:1.2;margin-top:2px;}
+  .week .ok{display:block;font-size:12px;margin-top:4px;color:var(--ochre-light);min-height:16px;}
+
+  /* TABS */
+  nav.tabs{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);}
+  nav.tabs .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;scrollbar-width:none;}
+  nav.tabs .wrap::-webkit-scrollbar{display:none;}
+  .tab{
+    all:unset;cursor:pointer;flex:0 0 auto;padding:9px 16px;border-radius:999px;
+    font-weight:600;font-size:15px;color:var(--teal-700);background:var(--panel);border:1px solid var(--line);
+  }
+  .tab[aria-selected="true"]{background:var(--teal-700);color:#fff;border-color:var(--teal-700);}
+  .tab .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ochre);margin-left:6px;vertical-align:middle;visibility:hidden;}
+  .tab.done .dot{visibility:visible;}
+
+  /* DAY */
+  section.day{display:none;padding-top:20px;}
+  section.day.active{display:block;}
+  .day-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:6px;}
+  .day-head h2{font-family:Georgia,"Times New Roman",serif;font-size:28px;margin:0;color:var(--teal-900);line-height:1.15;}
+  .day-head .tag{font-size:13px;font-weight:600;color:var(--ochre);text-transform:uppercase;letter-spacing:.08em;}
+  .goal{color:var(--muted);margin:0 0 14px;}
+  .progress{height:8px;background:var(--sage-light);border-radius:99px;overflow:hidden;margin:0 0 18px;}
+  .progress span{display:block;height:100%;width:0;background:var(--teal-500);transition:width .3s;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+  .card.warm{background:var(--sage-light);border-color:var(--sage);}
+  .card.circuit{border-left:5px solid var(--ochre);}
+  .row{display:flex;gap:14px;align-items:flex-start;}
+  .icon{flex:0 0 56px;height:56px;border-radius:14px;background:var(--sage-light);color:var(--teal-700);display:flex;align-items:center;justify-content:center;}
+  .icon svg{width:36px;height:36px;}
+  .card.warm .icon{background:#fff;}
+  .body{flex:1;min-width:0;}
+  .ex-num{font-size:13px;font-weight:700;color:var(--ochre);letter-spacing:.06em;text-transform:uppercase;}
+  h3{margin:2px 0 2px;font-size:20px;line-height:1.25;color:var(--teal-900);}
+  .en{font-size:13px;color:var(--muted);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;}
+  .chip{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:14px;font-weight:600;}
+  .chip.hl{background:var(--ochre-light);border-color:#E6CC9C;color:#7A4E12;}
+  ul.cues{margin:10px 0 0;padding-left:20px;color:#3C4640;font-size:15.5px;}
+  ul.cues li{margin:3px 0;}
+  .note{background:var(--ochre-light);border-radius:12px;padding:10px 12px;font-size:15px;margin:10px 0 0;color:#5E3E10;}
+
+  /* circuit list */
+  .c-list{margin:12px 0 0;border-top:1px solid var(--line);}
+  .c-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);}
+  .c-item .icon{flex-basis:44px;height:44px;border-radius:12px;}
+  .c-item .icon svg{width:28px;height:28px;}
+  .c-item .name{font-weight:600;font-size:16.5px;line-height:1.25;}
+  .c-item .cue{font-size:14px;color:var(--muted);}
+  .c-item .rep{margin-left:auto;text-align:right;font-weight:700;font-size:15px;white-space:nowrap;color:var(--teal-700);}
+  .c-item .rep small{display:block;font-weight:500;color:var(--muted);font-size:13px;}
+
+  /* trackers */
+  .track{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
+  .track .lab{font-size:14px;color:var(--muted);margin-right:4px;}
+  .bub{
+    all:unset;cursor:pointer;width:44px;height:44px;border-radius:50%;border:2px solid var(--sage);
+    display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--teal-700);background:#fff;font-size:16px;
+  }
+  .bub.on{background:var(--teal-500);border-color:var(--teal-500);color:#fff;}
+  .rest-btn{
+    all:unset;cursor:pointer;margin-left:auto;padding:10px 14px;border-radius:12px;background:var(--teal-900);color:#fff;font-weight:600;font-size:14.5px;
+  }
+  .rest-btn.alt{background:var(--ochre);}
+
+  .reset{all:unset;cursor:pointer;display:block;margin:4px auto 26px;color:var(--muted);font-size:14px;text-decoration:underline;}
+
+  /* info sections */
+  .info h2{font-family:Georgia,"Times New Roman",serif;font-size:24px;color:var(--teal-900);margin:28px 0 10px;}
+  .info ul{padding-left:20px;margin:0;}
+  .info li{margin:6px 0;}
+
+  /* TIMER BAR */
+  .timer{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--teal-900);color:#fff;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .25s;
+    box-shadow:0 -6px 20px rgba(0,0,0,.18);
+  }
+  .timer.show{transform:none;}
+  .timer .wrap{display:flex;align-items:center;gap:12px;padding:0;}
+  .timer .t-lab{font-size:13px;color:var(--sage);}
+  .timer .t-time{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;}
+  .timer .t-bar{height:5px;background:rgba(255,255,255,.15);border-radius:9px;overflow:hidden;margin-top:6px;}
+  .timer .t-bar span{display:block;height:100%;background:var(--ochre);width:100%;transition:width 1s linear;}
+  .timer .grow{flex:1;}
+  .timer button{all:unset;cursor:pointer;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.12);font-weight:600;font-size:14px;}
+  .timer.finished{background:var(--ochre);}
+  .timer.finished .t-lab{color:#fff;}
+
+  footer{color:var(--muted);font-size:13px;text-align:center;padding:24px 0 8px;}
+
+  @media (max-width:420px){
+    .hero h1{font-size:27px;}
+    .week .lbl{font-size:12.5px;}
+    .rest-btn{margin-left:0;}
+  }
+
+  /* PRINT: all days visible, no interactive bits */
+  @media print{
+    body{padding:0;background:#fff;font-size:12pt;}
+    nav.tabs,.timer,.reset,.track,.week .ok{display:none !important;}
+    header.hero{background:#fff;color:var(--ink);padding:0 0 10px;}
+    .hero .kicker,.hero p{color:var(--muted);}
+    .week button{border-color:var(--line);color:var(--ink);}
+    .week .num{color:var(--muted);}
+    section.day{display:block !important;page-break-before:always;}
+    .card{break-inside:avoid;}
+    .progress{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG icon set (generic equipment icons) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-kettlebell" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20a7 7 0 1 1 14 0"/><path d="M14 22h20l3 9a10 10 0 0 1-9.5 12h-7A10 10 0 0 1 11 31z"/></g></symbol>
+    <symbol id="i-body" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="9" r="4"/><path d="M24 14v14M14 20l10-3 10 3M24 28l-7 13M24 28l7 13"/></g></symbol>
+    <symbol id="i-lunge" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="22" cy="8" r="4"/><path d="M22 13v13M15 19h14M22 26l10 4v11M22 26l-9 7-3 8"/></g></symbol>
+    <symbol id="i-calf" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="7" r="4"/><path d="M24 12v15M17 18h14M24 27l-4 11M24 27l4 11M18 38l2 3M30 38l-2 3M8 43h32"/><path d="M38 14v10M35 17h6"/></g></symbol>
+    <symbol id="i-mat" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 40h38"/><circle cx="15" cy="24" r="4"/><path d="M18 28l8 6 6-10 6 10"/></g></symbol>
+    <symbol id="i-machine" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 42V8M10 30h16l4 12M14 30V18h8"/><path d="M30 30h8M38 26v8"/><rect x="34" y="6" width="8" height="12" rx="2"/></g></symbol>
+    <symbol id="i-cable" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 43V6h10v37M6 43h36"/><circle cx="18" cy="9" r="2.5"/><path d="M20 9l14 14"/><path d="M30 23h8"/><rect x="10" y="28" width="6" height="10" rx="1"/></g></symbol>
+    <symbol id="i-bench" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M28 30h14M32 30v10M38 30v10"/><circle cx="10" cy="26" r="4"/><path d="M13 28l18 2M6 40l7-12"/></g></symbol>
+    <symbol id="i-climber" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="18" r="4"/><path d="M14 21l16 4 10 13M14 21v17M30 25l-4 10 6 3"/><path d="M5 40h38"/></g></symbol>
+    <symbol id="i-swim" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 34c4 0 4-3 8-3s4 3 8 3 4-3 8-3 4 3 8 3 4-3 8-3"/><path d="M4 42c4 0 4-3 8-3s4 3 8 3 4-3 8-3 4 3 8 3 4-3 8-3"/><circle cx="34" cy="16" r="4"/><path d="M10 26l10-8 8 6M20 18l-6-6"/></g></symbol>
+    <symbol id="i-treadmill" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 40l34-6M38 34l2-24h-6"/><circle cx="20" cy="10" r="3.5"/><path d="M20 14l-2 10 5 6M18 24l-6 6M17 17l-5 3M20 17l6 2"/></g></symbol>
+    <symbol id="i-stretch" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="13" r="4"/><path d="M24 18v12M24 18l-9-12M24 18l9-12M24 30l-6 12M24 30l6 12"/></g></symbol>
+  </defs>
+</svg>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Plan de entrenamiento</div>
+    <h1>Mi rutina de 5 días</h1>
+    <p>Toca un día para ver los ejercicios. Marca cada serie cuando la termines.</p>
+    <div class="week" id="week"></div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Días"><div class="wrap" id="tabs" role="tablist"></div></nav>
+
+<main class="wrap" id="days"></main>
+
+<div class="wrap info" id="recovery">
+  <h2>Recuperación y progreso</h2>
+  <div class="card">
+    <ul>
+      <li>Incluye días de descanso cuando los necesites.</li>
+      <li>La natación del Día 3 debe ser siempre cómoda, sin apurarse.</li>
+      <li>Si el cansancio o las agujetas hacen que pierdas la técnica, baja la intensidad ese día.</li>
+      <li>Cuando completes todas las series y repeticiones con buena técnica, sube <b>poco a poco</b> el peso o las repeticiones.</li>
+      <li>Para de inmediato si sientes dolor en el pecho, mareo, falta de aire fuera de lo normal o dolor fuerte en una articulación.</li>
+    </ul>
+  </div>
+</div>
+
+<footer>Las marcas se guardan en este navegador. Usa «Reiniciar este día» para empezar una nueva semana.</footer>
+
+<!-- Rest timer -->
+<div class="timer" id="timer" role="status" aria-live="polite">
+  <div class="wrap">
+    <div class="grow">
+      <div class="t-lab" id="tLab">Descanso</div>
+      <div class="t-time" id="tTime">1:00</div>
+      <div class="t-bar"><span id="tBar"></span></div>
+    </div>
+    <button id="tAdd">+15 s</button>
+    <button id="tClose">Cerrar</button>
+  </div>
+</div>
+
+<script>
+const DAYS = [
+  {
+    id:"d1", tag:"Día 1", label:"Piernas", title:"Piernas", goal:"Objetivo: fuerza del tren inferior.",
+    blocks:[
+      {type:"warm", icon:"stretch", title:"Calentamiento", items:[
+        "5 minutos de estiramientos y movilidad.",
+        "10 minutos de calentamiento con tu propio peso (sentadillas suaves, círculos de cadera, marcha en el sitio)."
+      ]},
+      {type:"ex", key:"d1-goblet", num:"Ejercicio 1", name:"Sentadilla goblet", en:"Goblet Squat", icon:"kettlebell",
+        sets:3, reps:"8 repeticiones", weight:"20 kg", rest:90,
+        cues:["Sujeta la pesa pegada al pecho con las dos manos.","Baja como si te sentaras en una silla, espalda recta y talones apoyados.","Sube empujando el suelo con todo el pie."],
+        restText:"Descansa entre series."},
+      {type:"circuit", key:"d1-circ", num:"Ejercicio 2", name:"Circuito de piernas", en:"Leg Circuit", rounds:3, rest:90,
+        note:"Haz los 4 ejercicios seguidos, sin parar. Al terminar los 4, descansa 60–90 segundos. Repite 3 vueltas.",
+        items:[
+          {name:"Sentadilla búlgara", en:"Bulgarian Split Squat", icon:"lunge", reps:"8 por pierna", w:"Peso corporal", cue:"Pie de atrás apoyado en un banco; baja recto."},
+          {name:"Elevación de talones", en:"Calf Raises", icon:"calf", reps:"8", w:"8 kg", cue:"Sube despacio de puntillas y baja controlado."},
+          {name:"Abdominales (crunch)", en:"Abdominal Crunches", icon:"mat", reps:"10", w:"Peso corporal", cue:"Sube solo los hombros; no tires del cuello."},
+          {name:"Zancadas caminando", en:"Walking Lunges", icon:"lunge", reps:"8 por pierna", w:"Peso corporal", cue:"Paso largo; la rodilla de delante no pasa la punta del pie."}
+        ]},
+      {type:"ex", key:"d1-curl", num:"Ejercicio 3", name:"Curl femoral sentado", en:"Seated Leg Curl (máquina)", icon:"machine",
+        sets:3, reps:"8 repeticiones", weight:"Peso que permita 8 repeticiones controladas", rest:90,
+        cues:["Movimiento lento y controlado, sin dar tirones.","Lleva los talones hacia abajo y atrás; vuelve despacio."],
+        restText:"Descansa entre series."}
+    ]
+  },
+  {
+    id:"d2", tag:"Día 2", label:"Tren superior", title:"Tren superior", goal:"Objetivo: fuerza de espalda, hombros y brazos.",
+    blocks:[
+      {type:"warm", icon:"stretch", title:"Calentamiento", items:["5 minutos de estiramientos y movilidad de hombros (círculos de brazos, abrir y cerrar)."]},
+      {type:"ex", key:"d2-lat", num:"Ejercicio 1", name:"Jalón al pecho", en:"Lat Pulldown", icon:"cable", sets:3, reps:"8 repeticiones", rest:90,
+        cues:["Pecho alto; baja la barra hacia la parte alta del pecho.","Piensa en bajar los codos hacia las costillas."]},
+      {type:"ex", key:"d2-row", num:"Ejercicio 2", name:"Remo", en:"Rows", icon:"cable", sets:3, reps:"8 repeticiones", rest:90,
+        cues:["Espalda recta; tira hacia el ombligo.","Junta los omóplatos al final y vuelve despacio."]},
+      {type:"ex", key:"d2-face", num:"Ejercicio 3", name:"Face pull (polea a la cara)", en:"Face Pulls", icon:"cable", sets:3, reps:"8 repeticiones", rest:60,
+        cues:["Polea a la altura de la cara, cuerda con las dos manos.","Tira hacia la frente abriendo los codos hacia fuera."]},
+      {type:"ex", key:"d2-bic", num:"Ejercicio 4", name:"Curl de bíceps en polea", en:"Cable Bicep Curls", icon:"cable", sets:3, reps:"8 repeticiones", rest:60,
+        cues:["Codos pegados al cuerpo, sin balancearte.","Sube y baja despacio."]},
+      {type:"ex", key:"d2-tri", num:"Ejercicio 5", name:"Extensión de tríceps en polea", en:"Triceps Pushdown", icon:"cable", sets:3, reps:"8 repeticiones", rest:60,
+        cues:["Codos quietos a los lados.","Empuja hacia abajo hasta estirar el brazo; sube controlado."]}
+    ]
+  },
+  {
+    id:"d3", tag:"Día 3", label:"Natación", title:"Natación", goal:"Objetivo: recuperación activa.",
+    blocks:[
+      {type:"single", key:"d3-swim", name:"Nadar a ritmo cómodo", en:"Swimming — Active recovery", icon:"swim",
+        cues:["Nada a un ritmo cómodo, sin cansarte demasiado.","Concéntrate en la técnica y en la respiración.","Debe ser lo bastante suave para ayudar a recuperarte."]}
+    ]
+  },
+  {
+    id:"d4", tag:"Día 4", label:"Circuito", title:"Circuito de cuerpo completo", goal:"Objetivo: condición física y resistencia muscular.",
+    blocks:[
+      {type:"circuit", key:"d4-circ", num:"Circuito", name:"Cuerpo completo", en:"Full Body Circuit", rounds:3, rest:60,
+        note:"Haz los ejercicios en orden, uno tras otro. Al terminar la vuelta, descansa unos 60 segundos. Repite 3 vueltas. Movimientos controlados y buena técnica.",
+        items:[
+          {name:"Escaladores", en:"Mountain Climbers", icon:"climber", reps:"16", w:"", cue:"Manos bajo los hombros; lleva las rodillas al pecho alternando."},
+          {name:"Abdominales (crunch)", en:"Crunches", icon:"mat", reps:"15", w:"", cue:"Sube solo los hombros, sin tirar del cuello."},
+          {name:"Zancadas", en:"Lunges", icon:"lunge", reps:"8 por pierna", w:"", cue:"Espalda recta; baja la rodilla de atrás hacia el suelo."},
+          {name:"Flexiones inclinadas", en:"Incline Push-ups", icon:"bench", reps:"8", w:"", cue:"Manos en un banco; cuerpo recto como una tabla."}
+        ]}
+    ]
+  },
+  {
+    id:"d5", tag:"Día 5", label:"Cardio", title:"Cardio", goal:"Objetivo: resistencia cardiovascular.",
+    blocks:[
+      {type:"single", key:"d5-tread", name:"Caminar en cinta con inclinación", en:"Treadmill walking", icon:"treadmill", timer:1800,
+        chips:["30 minutos","Inclinación media a alta","Ritmo que puedas mantener"],
+        cues:["Ajusta la inclinación a tu nivel: debe costar, pero poder hablar.","Mantén un esfuerzo constante durante toda la sesión.","Intenta no agarrarte a las barras de la cinta."]}
+    ]
+  }
+];
+
+/* ---------- storage (safe) ---------- */
+const KEY = "rutina-mama-5dias-v1";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { state = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e) {} }
+
+const icon = (id) => `<svg aria-hidden="true"><use href="#i-${id}" xlink:href="#i-${id}"></use></svg>`;
+const fmtRest = s => s >= 60 ? (s % 60 ? `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")} min` : `${s/60} min`) : `${s} s`;
+
+function trackerHTML(key, count, label, rest){
+  let b = "";
+  for (let i = 0; i < count; i++){
+    const on = state[key] && state[key][i];
+    b += `<button class="bub${on ? " on" : ""}" data-key="${key}" data-i="${i}" aria-pressed="${!!on}" aria-label="${label} ${i+1}">${i+1}</button>`;
+  }
+  const restBtn = rest ? `<button class="rest-btn" data-rest="${rest}">⏱ Descanso ${fmtRest(rest)}</button>` : "";
+  return `<div class="track"><span class="lab">${label}:</span>${b}${restBtn}</div>`;
+}
+
+function blockHTML(b){
+  if (b.type === "warm"){
+    return `<div class="card warm"><div class="row"><div class="icon">${icon(b.icon)}</div><div class="body">
+      <h3>${b.title}</h3><ul class="cues">${b.items.map(i=>`<li>${i}</li>`).join("")}</ul></div></div></div>`;
+  }
+  if (b.type === "ex"){
+    const chips = [`<span class="chip hl">${b.sets} series × ${b.reps}</span>`];
+    if (b.weight) chips.push(`<span class="chip">Peso: ${b.weight}</span>`);
+    return `<div class="card"><div class="row"><div class="icon">${icon(b.icon)}</div><div class="body">
+      <div class="ex-num">${b.num}</div><h3>${b.name}</h3><div class="en">${b.en}</div>
+      <div class="chips">${chips.join("")}</div>
+      <ul class="cues">${b.cues.map(c=>`<li>${c}</li>`).join("")}</ul></div></div>
+      ${trackerHTML(b.key, b.sets, "Series", b.rest)}</div>`;
+  }
+  if (b.type === "circuit"){
+    const items = b.items.map(it => `<div class="c-item"><div class="icon">${icon(it.icon)}</div>
+      <div><div class="name">${it.name}</div><div class="cue">${it.cue}</div></div>
+      <div class="rep">${it.reps}${it.w ? `<small>${it.w}</small>` : ""}</div></div>`).join("");
+    return `<div class="card circuit"><div class="ex-num">${b.num}</div><h3>${b.name}</h3><div class="en">${b.en}</div>
+      <div class="chips"><span class="chip hl">${b.rounds} vueltas</span><span class="chip">Descanso: ${b.rest === 90 ? "60–90 s" : "~60 s"} por vuelta</span></div>
+      <div class="note">${b.note}</div>
+      <div class="c-list">${items}</div>
+      ${trackerHTML(b.key, b.rounds, "Vueltas", b.rest)}</div>`;
+  }
+  if (b.type === "single"){
+    const chips = b.chips ? `<div class="chips">${b.chips.map((c,i)=>`<span class="chip${i===0?" hl":""}">${c}</span>`).join("")}</div>` : "";
+    const timerBtn = b.timer ? `<button class="rest-btn alt" data-rest="${b.timer}" data-label="Caminata">⏱ Iniciar 30 min</button>` : "";
+    const on = state[b.key] && state[b.key][0];
+    return `<div class="card"><div class="row"><div class="icon">${icon(b.icon)}</div><div class="body">
+      <h3>${b.name}</h3><div class="en">${b.en}</div>${chips}
+      <ul class="cues">${b.cues.map(c=>`<li>${c}</li>`).join("")}</ul></div></div>
+      <div class="track"><span class="lab">¿Hecho?</span>
+      <button class="bub${on ? " on" : ""}" data-key="${b.key}" data-i="0" aria-pressed="${!!on}" aria-label="Sesión hecha">✓</button>${timerBtn}</div></div>`;
+  }
+  return "";
+}
+
+/* ---------- render ---------- */
+const weekEl = document.getElementById("week");
+const tabsEl = document.getElementById("tabs");
+const daysEl = document.getElementById("days");
+
+DAYS.forEach(d => {
+  weekEl.insertAdjacentHTML("beforeend",
+    `<button data-go="${d.id}"><span class="num">${d.tag}</span><span class="lbl">${d.label}</span><span class="ok" id="ok-${d.id}"></span></button>`);
+  tabsEl.insertAdjacentHTML("beforeend",
+    `<button class="tab" role="tab" id="tab-${d.id}" data-go="${d.id}" aria-controls="${d.id}" aria-selected="false">${d.tag} · ${d.label}<span class="dot"></span></button>`);
+  daysEl.insertAdjacentHTML("beforeend",
+    `<section class="day" id="${d.id}" role="tabpanel" aria-labelledby="tab-${d.id}">
+      <div class="day-head"><div><div class="tag">${d.tag}</div><h2>${d.title}</h2></div></div>
+      <p class="goal">${d.goal}</p>
+      <div class="progress"><span id="pg-${d.id}"></span></div>
+      ${d.blocks.map(blockHTML).join("")}
+      <button class="reset" data-reset="${d.id}">Reiniciar este día</button>
+    </section>`);
+});
+
+function dayTotals(d){
+  let total = 0, done = 0;
+  d.blocks.forEach(b => {
+    const n = b.type === "ex" ? b.sets : b.type === "circuit" ? b.rounds : b.type === "single" ? 1 : 0;
+    total += n;
+    for (let i = 0; i < n; i++) if (state[b.key] && state[b.key][i]) done++;
+  });
+  return {total, done};
+}
+function refreshProgress(){
+  DAYS.forEach(d => {
+    const {total, done} = dayTotals(d);
+    document.getElementById("pg-"+d.id).style.width = (total ? done/total*100 : 0) + "%";
+    const complete = total && done === total;
+    document.getElementById("tab-"+d.id).classList.toggle("done", !!complete);
+    document.getElementById("ok-"+d.id).textContent = complete ? "✓ hecho" : (done ? `${done}/${total}` : "");
+  });
+}
+
+function show(id, scroll){
+  document.querySelectorAll("section.day").forEach(s => s.classList.toggle("active", s.id === id));
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.go === id));
+  const tab = document.getElementById("tab-"+id);
+  if (tab && tab.scrollIntoView) tab.scrollIntoView({inline:"center", block:"nearest"});
+  try { localStorage.setItem(KEY+"-day", id); } catch(e) {}
+  if (scroll) document.querySelector("nav.tabs").scrollIntoView({behavior:"smooth"});
+}
+
+document.addEventListener("click", e => {
+  const go = e.target.closest("[data-go]");
+  if (go){ show(go.dataset.go, go.closest(".week")); return; }
+
+  const bub = e.target.closest(".bub");
+  if (bub){
+    const k = bub.dataset.key, i = +bub.dataset.i;
+    state[k] = state[k] || {};
+    state[k][i] = !state[k][i];
+    bub.classList.toggle("on", state[k][i]);
+    bub.setAttribute("aria-pressed", state[k][i]);
+    save(); refreshProgress();
+    return;
+  }
+
+  const rb = e.target.closest("[data-rest]");
+  if (rb){ startTimer(+rb.dataset.rest, rb.dataset.label || "Descanso"); return; }
+
+  const rs = e.target.closest("[data-reset]");
+  if (rs){
+    const d = DAYS.find(x => x.id === rs.dataset.reset);
+    d.blocks.forEach(b => { if (b.key) delete state[b.key]; });
+    save();
+    document.querySelectorAll(`#${d.id} .bub`).forEach(b => { b.classList.remove("on"); b.setAttribute("aria-pressed","false"); });
+    refreshProgress();
+  }
+});
+
+/* ---------- timer ---------- */
+const tEl = document.getElementById("timer"), tTime = document.getElementById("tTime"),
+      tBar = document.getElementById("tBar"), tLab = document.getElementById("tLab");
+let tInt = null, tEnd = 0, tTotal = 0;
+const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+
+function beep(){
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, .35, .7].forEach(t => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(.25, ctx.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + t + .3);
+      o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + .3);
+    });
+  } catch(e) {}
+  try { navigator.vibrate && navigator.vibrate([300,150,300]); } catch(e) {}
+}
+function tick(){
+  const left = Math.max(0, Math.round((tEnd - Date.now())/1000));
+  tTime.textContent = fmt(left);
+  tBar.style.width = (tTotal ? left/tTotal*100 : 0) + "%";
+  if (left <= 0){
+    clearInterval(tInt); tInt = null;
+    tEl.classList.add("finished");
+    tLab.textContent = tLab.dataset.base === "Caminata" ? "¡Sesión terminada!" : "¡A por la siguiente!";
+    beep();
+  }
+}
+function startTimer(sec, label){
+  clearInterval(tInt);
+  tTotal = sec; tEnd = Date.now() + sec*1000;
+  tLab.dataset.base = label; tLab.textContent = label;
+  tEl.classList.remove("finished"); tEl.classList.add("show");
+  tick(); tInt = setInterval(tick, 500);
+}
+document.getElementById("tAdd").onclick = () => {
+  if (!tInt){ startTimer(15, tLab.dataset.base || "Descanso"); return; }
+  tEnd += 15000; tTotal += 15; tick();
+};
+document.getElementById("tClose").onclick = () => { clearInterval(tInt); tInt = null; tEl.classList.remove("show","finished"); };
+
+/* ---------- init ---------- */
+let start = "d1";
+try { start = localStorage.getItem(KEY+"-day") || "d1"; } catch(e) {}
+if (!document.getElementById(start)) start = "d1";
+show(start, false);
+refreshProgress();
+</script>
+</body>
+</html>
